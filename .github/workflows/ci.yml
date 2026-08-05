@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  foundry:
+    name: Foundry — fmt, build, test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Show Forge version
+        run: forge --version
+
+      - name: Check formatting
+        run: forge fmt --check
+
+      - name: Build
+        run: forge build --sizes
+
+      - name: Test
+        run: forge test -vv
+
+      - name: Gas report
+        run: forge test --gas-report > gas-report.txt || true
+
+      - name: Upload gas report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gas-report
+          path: gas-report.txt
+
+  # Uncomment once you have at least 3 vulnerability cases in place —
+  # Slither has been known to flag intentionally vulnerable code as errors,
+  # which is exactly what we want, but the pipeline needs to allow it.
+  #
+  # slither:
+  #   name: Slither — static analysis
+  #   runs-on: ubuntu-latest
+  #   continue-on-error: true
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: crytic/slither-action@v0.4.0
+  #       with:
+  #         solc-version: 0.8.24
