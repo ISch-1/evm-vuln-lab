@@ -54,16 +54,18 @@ contract ReentrancyTest is Test {
         vault = new EtherStore();
         safeVault = new EtherStoreSafe();
 
-        // Three honest depositors seed each vault with 5 ETH total.
+        // Three honest depositors seed each vault with 6 ETH total. Whole-ether
+        // amounts matter: the attacker withdraws 1 ETH per re-entry, so any wei
+        // remainder would be left behind and the vault never reaches zero.
         for (uint256 i; i < 3; ++i) {
             address who = [alice, bob, carol][i];
             vm.deal(who, 10 ether);
 
             vm.prank(who);
-            vault.deposit{value: 5 ether / 3}();
+            vault.deposit{value: 2 ether}();
 
             vm.prank(who);
-            safeVault.deposit{value: 5 ether / 3}();
+            safeVault.deposit{value: 2 ether}();
         }
     }
 
@@ -85,7 +87,9 @@ contract ReentrancyTest is Test {
         console2.log("attacker balance    :", attackerBalance);
 
         assertEq(vaultAfter, 0, "vault should be fully drained");
-        assertGt(attackerBalance, vaultBefore, "attacker walked away with the deposit + honest funds");
+        assertGt(
+            attackerBalance, vaultBefore, "attacker walked away with the deposit + honest funds"
+        );
     }
 
     /// @dev The same attack must FAIL against the patched vault.

@@ -38,9 +38,8 @@ evm-vuln-lab/
 ## Running it
 
 ```bash
-git clone https://github.com/ISch-1/evm-vuln-lab
+git clone --recursive https://github.com/ISch-1/evm-vuln-lab   # forge-std is a submodule
 cd evm-vuln-lab
-forge install                       # installs forge-std
 forge test -vv                      # runs everything
 forge test --match-path test/01-reentrancy/*.t.sol -vvv   # one case, verbose traces
 ```
@@ -48,14 +47,12 @@ forge test --match-path test/01-reentrancy/*.t.sol -vvv   # one case, verbose tr
 Output you should see for case 01:
 
 ```
-[PASS] test_Exploit_DrainsEtherStore()  (gas: ...)
-  attacker_balance_before: 0
-  etherstore_balance_before: 5 ether
-  attacker_balance_after:  5 ether     <-- drained
-  etherstore_balance_after: 0
-
-[PASS] test_Fix_ExploitFails()  (gas: ...)
-  reverted with: ReentrancyGuardReentrantCall()
+[PASS] test_Exploit_DrainsEtherStore() (gas: ...)
+Logs:
+  vault balance before: 6000000000000000000     <-- 3 honest depositors x 2 ETH
+  vault balance after : 0                       <-- drained
+  attacker balance    : 7000000000000000000     <-- their 6 ETH + the attacker's own 1 ETH
+[PASS] test_Fix_ExploitFails() (gas: ...)
 ```
 
 ## Design notes (why the code looks like this)

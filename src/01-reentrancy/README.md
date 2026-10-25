@@ -10,11 +10,11 @@
 
 ```
 Attacker.attack()  →  EtherStore.withdraw()
-                        ├── reads bal (5 ETH)
-                        ├── calls Attacker.receive() with 5 ETH
+                        ├── reads bal (1 ETH)
+                        ├── calls Attacker.receive() with 1 ETH
                         │     └── Attacker.receive()  →  EtherStore.withdraw()
-                        │                                 ├── reads bal (still 5 ETH!) 
-                        │                                 ├── calls Attacker.receive() with 5 ETH
+                        │                                 ├── reads bal (still 1 ETH!)
+                        │                                 ├── calls Attacker.receive() with 1 ETH
                         │                                 │     └── ... loop until vault is empty
                         │                                 └── sets bal = 0  (way too late)
                         └── sets bal = 0
